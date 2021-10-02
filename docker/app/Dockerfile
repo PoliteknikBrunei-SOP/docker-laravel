@@ -12,7 +12,7 @@ RUN apt-get update \
     && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata
 
-# Making php 7.4 to install properly
+# Making php 8.0 to install properly
 RUN apt-get install -y software-properties-common \
     && add-apt-repository ppa:ondrej/php \
     && add-apt-repository ppa:ondrej/nginx
@@ -35,10 +35,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && echo "daemon off;" >> /etc/nginx/nginx.conf
 
-# Making sure php uses php 7.4
-RUN  update-alternatives --set php /usr/bin/php7.4 \
-    && update-alternatives --set phar /usr/bin/phar7.4 \
-    && update-alternatives --set phar.phar /usr/bin/phar.phar7.4 
+# Making sure php uses php 8.0
+RUN  update-alternatives --set php /usr/bin/php8.0 \
+    && update-alternatives --set phar /usr/bin/phar8.0 \
+    && update-alternatives --set phar.phar /usr/bin/phar.phar8.0 
 
 # Output logs from Nginx correctly
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
@@ -51,7 +51,7 @@ ADD default /etc/nginx/sites-available/default
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Some custom configuration for making php-fpm (Nginx) work correctly.
-ADD php-fpm.conf /etc/php/7.4/fpm/php-fpm.conf
+ADD php-fpm.conf /etc/php/8.0/fpm/php-fpm.conf
 
 # Custom bash script to run supervisord
 ADD start-container /usr/bin/start-container
