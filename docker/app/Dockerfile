@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 LABEL maintainer="<group>"
 
@@ -12,7 +12,7 @@ RUN apt-get update \
     && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata
 
-# Making php 8.0 to install properly
+# Making php to install properly
 RUN apt-get install -y software-properties-common \
     && add-apt-repository ppa:ondrej/php \
     && add-apt-repository ppa:ondrej/nginx
@@ -35,10 +35,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && echo "daemon off;" >> /etc/nginx/nginx.conf
 
-# Making sure php uses php 8.0
-RUN  update-alternatives --set php /usr/bin/php8.0 \
-    && update-alternatives --set phar /usr/bin/phar8.0 \
-    && update-alternatives --set phar.phar /usr/bin/phar.phar8.0 
+# Making sure php uses php 8.1
+RUN  update-alternatives --set php /usr/bin/php8.1 \
+    && update-alternatives --set phar /usr/bin/phar8.1 \
+    && update-alternatives --set phar.phar /usr/bin/phar.phar8.1 
 
 # Output logs from Nginx correctly
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
