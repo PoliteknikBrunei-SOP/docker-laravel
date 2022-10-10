@@ -28,6 +28,7 @@ RUN apt-get update \
        php-fpm php-mysql \
        php-mbstring php-xml php-bcmath \
        php-msgpack php-igbinary \
+       php-curl \
     && php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer \
     && mkdir /run/php \
     && apt-get -y autoremove \
