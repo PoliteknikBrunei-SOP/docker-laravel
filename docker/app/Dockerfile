@@ -21,14 +21,14 @@ RUN apt-get update \
     && apt-get install -y curl zip unzip git supervisor sqlite3 nginx \
     && which nginx
 
-# Installing PHP plugins and composer, removing cache
+# Installing PHP plugins (locking to PHP 8.1) and composer, removing cache
 RUN apt-get update \
     && add-apt-repository universe \
     && apt-get install -y \
-       php-fpm php-mysql \
-       php-mbstring php-xml php-bcmath \
-       php-msgpack php-igbinary \
-       php-curl \
+       php8.1-fpm php8.1-mysql \
+       php8.1-mbstring php8.1-xml php8.1-bcmath \
+       php8.1-msgpack php8.1-igbinary \
+       php8.1-curl \
     && php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer \
     && mkdir /run/php \
     && apt-get -y autoremove \
@@ -52,7 +52,7 @@ ADD default /etc/nginx/sites-available/default
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Some custom configuration for making php-fpm (Nginx) work correctly.
-ADD php-fpm.conf /etc/php/8.0/fpm/php-fpm.conf
+ADD php-fpm.conf /etc/php/8.1/fpm/php-fpm.conf
 
 # Custom bash script to run supervisord
 ADD start-container /usr/bin/start-container
