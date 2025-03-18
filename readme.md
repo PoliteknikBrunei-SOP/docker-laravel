@@ -6,7 +6,7 @@ This is an example of how you can quickly get up and running with Docker to Lara
 
 ## Teach me how to use it!
 
-Clone this repo and follow the lesson on PB LMS SOP.
+Clone this repo and follow the lesson on PB LMS DOP.
 
 ## Credit
 This repo was based on Chris Fadao's [Shipping Docker PHP-app](https://github.com/shipping-docker/php-app)
