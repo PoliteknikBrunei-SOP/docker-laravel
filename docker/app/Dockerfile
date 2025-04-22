@@ -2,60 +2,56 @@ FROM ubuntu:24.04
 
 LABEL maintainer="<group>"
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Asia/Brunei
 
-# Setting timezone
-RUN apt-get update \
-    && apt-get install -y gnupg tzdata \
-    && echo "UTC" | tee /etc/timezone \
-    && unlink /etc/localtime \
-    && ln -s /usr/share/zoneinfo/UTC /etc/localtime \
+# Install base dependencies and PHP 8.3 + Laravel-friendly extensions
+RUN apt-get update && apt-get install -y \
+    tzdata \
+    curl \
+    zip \
+    unzip \
+    git \
+    supervisor \
+    sqlite3 \
+    nginx \
+    php8.3 php8.3-fpm php8.3-cli \
+    php8.3-mysql php8.3-sqlite3 \
+    php8.3-mbstring php8.3-xml php8.3-bcmath php8.3-curl \
+    php8.3-tokenizer php8.3-ctype php8.3-fileinfo php8.3-opcache \
+    php8.3-readline \
+    && ln -sf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo "$TZ" > /etc/timezone \
     && dpkg-reconfigure -f noninteractive tzdata
 
-# Making php to install properly
-RUN apt-get install -y software-properties-common \
-    && add-apt-repository ppa:ondrej/php \
-    && add-apt-repository ppa:ondrej/nginx
+# Set PHP 8.3 as default
+RUN update-alternatives --set php /usr/bin/php8.3 \
+    && update-alternatives --set phar /usr/bin/phar8.3 \
+    && update-alternatives --set phar.phar /usr/bin/phar.phar8.3
 
-RUN apt-get update \
-    && apt-get install -y curl zip unzip git supervisor sqlite3 nginx \
-    && which nginx
+# Install Composer from official image (secure + fast)
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Installing PHP plugins (locking to PHP 8.3) and composer, removing cache
-RUN apt-get update \
-    && add-apt-repository universe \
-    && apt-get install -y \
-       php8.3-fpm php8.3-mysql \
-       php8.3-mbstring php8.3-xml php8.3-bcmath \
-       php8.3-msgpack php8.3-igbinary \
-       php8.3-curl \
-    && php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer \
-    && mkdir /run/php \
-    && apt-get -y autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+# Prepare directories
+RUN mkdir -p /run/php \
     && echo "daemon off;" >> /etc/nginx/nginx.conf
 
-# Making sure php uses php 8.3
-RUN  update-alternatives --set php /usr/bin/php8.3 \
-    && update-alternatives --set phar /usr/bin/phar8.3 \
-    && update-alternatives --set phar.phar /usr/bin/phar.phar8.3 
-
-# Output logs from Nginx correctly
+# Log forwarding to Docker stdout/stderr
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
-# Setup virtual host for Nginx 
-ADD default /etc/nginx/sites-available/default
+# Set working directory
+WORKDIR /var/www/html
 
-# Making sure nginx process runs consistently, monitored by supervisord
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Copy configuration files
+COPY default /etc/nginx/sites-available/default
+COPY php-fpm.conf /etc/php/8.3/fpm/php-fpm.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY start-container /usr/bin/start-container
 
-# Some custom configuration for making php-fpm (Nginx) work correctly.
-ADD php-fpm.conf /etc/php/8.3/fpm/php-fpm.conf
-
-# Custom bash script to run supervisord
-ADD start-container /usr/bin/start-container
 RUN chmod +x /usr/bin/start-container
+
+# This is for documentation and clarity
+EXPOSE 80
 
 ENTRYPOINT ["start-container"]

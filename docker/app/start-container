@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
 
+set -e  # Exit on any error
+
 ##
-# Ensure /.composer exists and is writable
+# Setup Composer cache directory with secure permissions
 #
-if [ ! -d /.composer ]; then
-    mkdir /.composer
+COMPOSER_HOME="/.composer"
+
+if [ ! -d "$COMPOSER_HOME" ]; then
+    mkdir -p "$COMPOSER_HOME"
+    chown -R www-data:www-data "$COMPOSER_HOME"
 fi
 
-chmod -R ugo+rw /.composer
+chmod -R 770 "$COMPOSER_HOME"  # Owner & group can read/write/execute
 
 ##
-# Run a command or start supervisord
+# Run a command (like `php artisan migrate`) or start supervisord
 #
-if [ $# -gt 0 ];then
-    # If we passed a command, run it
+if [ $# -gt 0 ]; then
+    echo "📦 Running command: $@"
     exec "$@"
 else
-    # Otherwise start supervisord
-    /usr/bin/supervisord
+    echo "🚀 Starting supervisord..."
+    exec /usr/bin/supervisord
 fi
