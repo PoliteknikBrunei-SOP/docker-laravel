@@ -15,25 +15,6 @@ fi
 chmod -R 770 "$COMPOSER_HOME"  # Owner & group can read/write/execute
 
 ##
-# Optional Laravel bootstrapping
-#
-LARAVEL_ROOT="/var/www/html"
-
-if [ -f "$LARAVEL_ROOT/artisan" ]; then
-    echo "🔧 Detected Laravel app. Running bootstrap commands..."
-    
-    # Set correct permissions for Laravel storage and cache dirs
-    chown -R www-data:www-data "$LARAVEL_ROOT/storage" "$LARAVEL_ROOT/bootstrap/cache"
-    chmod -R 775 "$LARAVEL_ROOT/storage" "$LARAVEL_ROOT/bootstrap/cache"
-
-    # Run artisan boot commands
-    sudo -u www-data php artisan config:clear
-    sudo -u www-data php artisan config:cache
-    sudo -u www-data php artisan route:cache || true  # allow failure (not all apps support it)
-    sudo -u www-data php artisan view:cache
-fi
-
-##
 # Run a command (like `php artisan migrate`) or start supervisord
 #
 if [ $# -gt 0 ]; then
